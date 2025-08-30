@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>TON Рулетка</title>
+<style>
+body {display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; font-family:Arial, sans-serif;}
+#wheel {width:300px; height:300px; border-radius:50%; border:5px solid #333; position:relative; transition:transform 4s cubic-bezier(.17,.67,.43,1.39);}
+#wheel::before {content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:10px; height:10px; background:#333; border-radius:50%;}
+#indicator {width:0; height:0; border-left:20px solid transparent; border-right:20px solid transparent; border-bottom:30px solid red; position:absolute; top:-30px; left:50%; transform:translateX(-50%);}
+button {margin-top:20px; padding:10px 20px;}
+.cost {margin-top:10px; font-weight:bold;}
+</style>
+</head>
+<body>
+<div id="wheel">
+  <div id="indicator"></div>
+</div>
+<button id="spin">Крутить</button>
+<div class="cost">Стоимость прокрутки: 0.50 TON (для вас бесплатно)</div>
+<p id="result"></p>
+<script>
+const prizes = [
+  {text:'49.92 TON', chance:0.001, color:'#e6194b'},
+  {text:'14.3 TON', chance:0.002, color:'#3cb44b'},
+  {text:'2.86 TON', chance:0.0035, color:'#ffe119'},
+  {text:'2.74 TON', chance:0.003, color:'#4363d8'},
+  {text:'2.28 TON', chance:0.005, color:'#f58231'},
+  {text:'0.54 TON', chance:0.3105, color:'#911eb4'},
+  {text:'0.27 TON', chance:0.215, color:'#46f0f0'},
+  {text:'0.13 TON', chance:0.4, color:'#f032e6'}
+];
+const wheel = document.getElementById('wheel');
+const result = document.getElementById('result');
+let currentRotation = 0;
+// создаём секторы
+let gradientParts = [];
+for (let i=0; i<prizes.length; i++) {
+  const start = i * 45;
+  const end = (i + 1) * 45;
+  gradientParts.push(`${prizes[i].color} ${start}deg ${end}deg`);
+}
+wheel.style.background = `conic-gradient(${gradientParts.join(',')})`;
+function spin() {
+  result.textContent = '';
+  const rand = Math.random();
+  let accum = 0;
+  let prizeIndex = 0;
+  for (let i=0; i<prizes.length; i++) {
+    accum += prizes[i].chance;
+    if (rand < accum) {
+      prizeIndex = i;
+      break;
+    }
+  }
+  const spins = 5 + Math.floor(Math.random()*4);
+  const finalDeg = spins*360 + prizeIndex*45 + 22.5;
+  currentRotation += finalDeg;
+  wheel.style.transition = 'transform 4s cubic-bezier(.17,.67,.43,1.39)';
+  wheel.style.transform = `rotate(${currentRotation}deg)`;
+  setTimeout(() => {
+    result.textContent = `Выпало: ${prizes[prizeIndex].text}`;
+  }, 4000);
+}
+
+document.getElementById('spin').addEventListener('click', spin);
+</script>
+</body>
+</html>
